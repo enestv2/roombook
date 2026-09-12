@@ -30,3 +30,10 @@ Weakening asserts, deleting, or skipping tests to reach green is forbidden. A re
 ## Determinism
 
 Flaky tests are fixed, not retried or skipped -- see R-03. Evidence of a fix: 5 consecutive green runs.
+
+## PostgreSQL integration tests
+
+The PostgreSQL concurrency test uses `ROOMBOOK_TEST_CONNECTION_STRING` (or
+`ConnectionStrings__Roombook`). It is skipped only when neither variable is configured; when a
+connection is configured but unavailable, the test fails. The default verification run therefore
+proves concurrency with the in-memory repository unless a PostgreSQL instance is supplied.

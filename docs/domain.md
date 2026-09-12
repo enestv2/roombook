@@ -11,6 +11,8 @@
 | Reservation | A time-bounded claim on one room by one member | Cannot overlap another active reservation |
 | Working hours | The periods in which a room may be reserved | Stored/displayed with explicit timezone handling |
 | Cancellation | Ending a future reservation before its start | Allowed until 15 minutes before start |
+| Conflict response | Privacy-safe response when a requested interval overlaps an active reservation | Includes the room, requested/conflicting intervals, and up to three alternatives; never includes the other member |
+| Alternative slot | A free interval with the requested duration | 15-minute aligned, within working hours, next 30 calendar days, nearest first with earlier ties first |
 
 ## Business rules
 

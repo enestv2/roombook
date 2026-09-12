@@ -11,6 +11,10 @@ Thumbs.db
 
 # Logs
 *.log
+**/bin/
+**/obj/
+client/node_modules/
+client/dist/
 
 # Claude Code personal settings (shared settings.json IS committed after init)
 .claude/settings.local.json

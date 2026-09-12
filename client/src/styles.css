@@ -1,0 +1,1 @@
+body { font-family: system-ui, sans-serif; margin: 2rem; } form { display: grid; gap: 1rem; max-width: 28rem; } label { display: grid; gap: .25rem; } input { padding: .5rem; } button { padding: .5rem .75rem; width: fit-content; } [role=alert] { color: #a00; }
