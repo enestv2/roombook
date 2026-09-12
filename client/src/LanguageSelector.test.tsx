@@ -26,7 +26,7 @@ describe('language selector', () => {
     fireEvent.change(inputs[0], { target: { value: '2030-01-01T09:00' } });
     await user.selectOptions(screen.getByRole('combobox'), 'tr');
 
-    expect(screen.getByRole('heading', { name: 'Oda ayırt' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Toplantı zamanınızı belirleyin' })).toBeTruthy();
     expect((inputs[0] as HTMLInputElement).value).toBe('2030-01-01T09:00');
   });
 });

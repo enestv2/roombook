@@ -84,8 +84,8 @@ function errorMap(payload: unknown, status: number): { errors: Record<string, st
     }));
     if (Object.keys(result).length > 0) return { errors: result, errorCodes: error.errorCodes, code: error.code };
   }
-  if (status === 401) return { errors: { authorization: [i18n.t('errors.authorizationRequired')] }, code: error?.code };
-  if (status === 403) return { errors: { authorization: [i18n.t('errors.notAuthorized')] }, code: error?.code };
+  if (status === 401) return { errors: { authorization: [error?.detail ?? error?.title ?? i18n.t('errors.authorizationRequired')] }, code: error?.code };
+  if (status === 403) return { errors: { authorization: [error?.detail ?? error?.title ?? i18n.t('errors.notAuthorized')] }, code: error?.code };
   return { errors: { form: [i18n.t('errors.genericBooking')] }, code: error?.code };
 }
 
