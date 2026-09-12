@@ -66,6 +66,16 @@ describe('booking API states', () => {
     expect(result.errors?.authorization).toHaveLength(1);
   });
 
+  it.each([401, 403])('preserves a server-provided localized message for %s responses', async status => {
+    setLanguage('tr');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ detail: 'Oturum açmanız gerekiyor.' }), { status })));
+
+    const result = await createBooking({ roomId: 'room', startsAt: '', endsAt: '' });
+
+    expect(result.errors?.authorization).toEqual(['Oturum açmanız gerekiyor.']);
+    setLanguage('en');
+  });
+
   it('loads configured rooms instead of relying on a client-side room id', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([
       { id: 'room-1', name: 'Board room', timeZone: 'Europe/Istanbul', workingPeriods: [] }
