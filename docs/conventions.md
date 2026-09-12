@@ -26,5 +26,5 @@ Do not use floating point for values that require exactness.
 ## Enforced by tooling
 
 `scripts/check` is the single contract. Once the application exists it runs .NET build/tests with
-warnings as errors and the React lint/typecheck/test commands; architectural and security rules
-remain reviewable until automated checks are added.
+warnings as errors and the React lint/typecheck/test/production-build commands; architectural and
+security rules remain reviewable until automated checks are added.
