@@ -1,0 +1,19 @@
+{
+  "language": { "label": "Dil", "turkish": "Türkçe", "english": "İngilizce" },
+  "rooms": { "loading": "Odalar yükleniyor…", "empty": "Şu anda uygun oda yok.", "loadFailed": "Odalar yüklenemedi." },
+  "fields": { "startsAt": "Başlangıç", "endsAt": "Bitiş", "roomId": "Oda", "time": "Zaman", "authorization": "Yetkilendirme", "form": "Form" },
+  "booking": {
+    "title": "Oda ayırt", "start": "Başlangıç", "end": "Bitiş", "submit": "Odayı ayırt",
+    "confirmed": "Rezervasyon onaylandı", "conflictTitle": "Bu zaman uygun değil",
+    "noAlternatives": "Alternatif bulunamadı.",
+    "submitFailed": "Rezervasyon gönderilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
+    "invalidResponse": "Rezervasyon yanıtı geçersiz."
+  },
+  "errors": {
+    "authorizationRequired": "Oda ayırtmak için giriş yapmalısınız.",
+    "notAuthorized": "Oda ayırtma yetkiniz yok.",
+    "genericBooking": "Rezervasyon oluşturulamadı.",
+    "registrationFailed": "Üye kaydı oluşturulamadı.",
+    "signInFailed": "Üye girişi yapılamadı."
+  }
+}

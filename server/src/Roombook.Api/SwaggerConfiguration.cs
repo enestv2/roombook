@@ -76,13 +76,19 @@ internal sealed class RoombookSchemaFilter : ISchemaFilter
         {
             schema.Description = "Field-level validation errors. Unexpected failures use the sanitized ProblemDetails shape instead.";
             AddCorrelationId(schema);
+            AddErrorCode(schema);
             schema.Example = new OpenApiObject
             {
                 ["title"] = new OpenApiString("Validation failed."),
                 ["status"] = new OpenApiInteger(400),
+                ["code"] = new OpenApiString("validation.failed"),
                 ["errors"] = new OpenApiObject
                 {
                     ["field"] = new OpenApiArray { new OpenApiString("The value is invalid.") }
+                },
+                ["errorCodes"] = new OpenApiObject
+                {
+                    ["field"] = new OpenApiArray { new OpenApiString("validation.invalid") }
                 },
                 ["correlationId"] = new OpenApiString("00000000-0000-0000-0000-000000000099")
             };
@@ -91,10 +97,12 @@ internal sealed class RoombookSchemaFilter : ISchemaFilter
         {
             schema.Description = "Sanitized error response. Internal exception details are never exposed; use correlationId when contacting support.";
             AddCorrelationId(schema);
+            AddErrorCode(schema);
             schema.Example = new OpenApiObject
             {
                 ["title"] = new OpenApiString("The request could not be completed."),
                 ["status"] = new OpenApiInteger(500),
+                ["code"] = new OpenApiString("request.unexpected"),
                 ["correlationId"] = new OpenApiString("00000000-0000-0000-0000-000000000099")
             };
         }
@@ -116,10 +124,10 @@ internal sealed class RoombookSchemaFilter : ISchemaFilter
                 break;
             case nameof(ConflictResponse):
                 schema.Required = Required("roomId", "requestedStartUtc", "requestedEndUtc",
-                    "conflictingStartUtc", "conflictingEndUtc", "alternatives", "timeZone", "message");
+                    "conflictingStartUtc", "conflictingEndUtc", "alternatives", "timeZone", "code", "message");
                 break;
             case nameof(ValidationProblemDetails):
-                schema.Required = Required("errors");
+                schema.Required = Required("errors", "code", "errorCodes");
                 break;
         }
     }
@@ -133,6 +141,27 @@ internal sealed class RoombookSchemaFilter : ISchemaFilter
             Type = "string",
             Description = "Correlation identifier returned in the X-Correlation-Id response header.",
             Example = new OpenApiString("00000000-0000-0000-0000-000000000099")
+        };
+    }
+
+    private static void AddErrorCode(OpenApiSchema schema)
+    {
+        schema.Properties["code"] = new OpenApiSchema
+        {
+            Type = "string",
+            Description = "Stable machine-readable error code. Human-readable messages vary by Accept-Language.",
+            Example = new OpenApiString("request.unexpected")
+        };
+        schema.Properties["errorCodes"] = new OpenApiSchema
+        {
+            Type = "object",
+            Description = "Stable field-level error codes parallel to the errors property.",
+            AdditionalPropertiesAllowed = true,
+            AdditionalProperties = new OpenApiSchema
+            {
+                Type = "array",
+                Items = new OpenApiSchema { Type = "string" }
+            }
         };
     }
 
@@ -286,7 +315,8 @@ internal sealed class RoombookOperationFilter : IOperationFilter
             }
         },
         ["timeZone"] = new OpenApiString("UTC"),
-        ["message"] = new OpenApiString("The requested interval is already booked.")
+        ["message"] = new OpenApiString("The requested interval is already booked."),
+        ["code"] = new OpenApiString("booking.conflict")
     };
 
     private static OpenApiObject ValidationProblemExample() => new()
@@ -294,9 +324,14 @@ internal sealed class RoombookOperationFilter : IOperationFilter
         ["type"] = new OpenApiString("https://tools.ietf.org/html/rfc7231#section-6.5.1"),
         ["title"] = new OpenApiString("Booking validation failed."),
         ["status"] = new OpenApiInteger(400),
+        ["code"] = new OpenApiString("validation.failed"),
         ["errors"] = new OpenApiObject
         {
             ["startsAt"] = new OpenApiArray { new OpenApiString("Start must be on a 15-minute boundary.") }
+        },
+        ["errorCodes"] = new OpenApiObject
+        {
+            ["startsAt"] = new OpenApiArray { new OpenApiString("booking.start_not_aligned") }
         },
         ["correlationId"] = new OpenApiString("00000000-0000-0000-0000-000000000099")
     };
@@ -308,6 +343,9 @@ internal sealed class RoombookOperationFilter : IOperationFilter
             : title.Contains("authorized", StringComparison.Ordinal) ? 403
             : title.Contains("found", StringComparison.Ordinal) ? 404 : 500),
         ["detail"] = new OpenApiString("The request could not be completed."),
+        ["code"] = new OpenApiString(title.Contains("Authentication", StringComparison.Ordinal) ? "authorization.required"
+            : title.Contains("authorized", StringComparison.Ordinal) ? "authorization.forbidden"
+            : title.Contains("found", StringComparison.Ordinal) ? "resource.not_found" : "request.unexpected"),
         ["correlationId"] = new OpenApiString("00000000-0000-0000-0000-000000000099")
     };
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0</value></resheader>
+  <data name="validation.failed" xml:space="preserve"><value>Doğrulama başarısız.</value></data>
+  <data name="validation.invalid" xml:space="preserve"><value>Değer geçersiz.</value></data>
+  <data name="booking.room_not_found" xml:space="preserve"><value>Oda bulunamadı.</value></data>
+  <data name="booking.room_unavailable" xml:space="preserve"><value>Oda uygun değil.</value></data>
+  <data name="booking.start_in_past" xml:space="preserve"><value>Rezervasyon gelecekte başlamalıdır.</value></data>
+  <data name="booking.end_before_start" xml:space="preserve"><value>Bitiş başlangıçtan sonra olmalıdır.</value></data>
+  <data name="booking.start_not_aligned" xml:space="preserve"><value>Başlangıç 15 dakikalık aralığa uymalıdır.</value></data>
+  <data name="booking.end_not_aligned" xml:space="preserve"><value>Bitiş 15 dakikalık aralığa uymalıdır.</value></data>
+  <data name="booking.duration_too_short" xml:space="preserve"><value>Rezervasyon süresi en az 15 dakika olmalıdır.</value></data>
+  <data name="booking.duration_too_long" xml:space="preserve"><value>Rezervasyon süresi 4 saati aşamaz.</value></data>
+  <data name="booking.outside_working_hours" xml:space="preserve"><value>Aralık, odanın çalışma saatleri içinde olmalıdır.</value></data>
+  <data name="booking.timestamp_offset_required" xml:space="preserve"><value>Zaman damgası açık bir UTC farkı içermelidir (örneğin Z veya +03:00).</value></data>
+  <data name="booking.conflict" xml:space="preserve"><value>İstenen zaman aralığı zaten rezerve edilmiş.</value></data>
+  <data name="booking.no_alternatives" xml:space="preserve"><value>Uygun alternatif bulunamadı.</value></data>
+  <data name="authorization.required" xml:space="preserve"><value>Kimlik doğrulaması gerekiyor.</value></data>
+  <data name="authorization.forbidden" xml:space="preserve"><value>Bu işlemi yapmaya yetkiniz yok.</value></data>
+  <data name="resource.not_found" xml:space="preserve"><value>İstenen kaynak bulunamadı.</value></data>
+  <data name="request.unexpected" xml:space="preserve"><value>Beklenmeyen bir hata oluştu.</value></data>
+  <data name="request.unexpected_detail" xml:space="preserve"><value>İstek tamamlanamadı. Destek ekibiyle iletişime geçerken ilişkilendirme kimliğini kullanın.</value></data>
+  <data name="identity.duplicate_email" xml:space="preserve"><value>E-posta zaten kayıtlı.</value></data>
+  <data name="identity.duplicate_username" xml:space="preserve"><value>Kullanıcı adı zaten kullanılıyor.</value></data>
+  <data name="identity.invalid_email" xml:space="preserve"><value>E-posta geçerli değil.</value></data>
+  <data name="identity.password_too_short" xml:space="preserve"><value>Şifre çok kısa.</value></data>
+  <data name="identity.password_requires_digit" xml:space="preserve"><value>Şifre bir rakam içermelidir.</value></data>
+  <data name="identity.password_requires_lower" xml:space="preserve"><value>Şifre küçük harf içermelidir.</value></data>
+  <data name="identity.password_requires_upper" xml:space="preserve"><value>Şifre büyük harf içermelidir.</value></data>
+  <data name="identity.password_requires_symbol" xml:space="preserve"><value>Şifre alfasayısal olmayan bir karakter içermelidir.</value></data>
+  <data name="identity.invalid_token" xml:space="preserve"><value>Belirteç geçersiz.</value></data>
+</root>

@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
+using Roombook.Api.Localization;
 using Roombook.Reservations;
 using Roombook.Rooms;
 
@@ -12,7 +14,10 @@ namespace Roombook.Api.Controllers;
 [ApiController]
 [Route("api/bookings")]
 [Authorize(Roles = "Member")]
-public sealed class BookingsController(BookingService service, IRoomAvailability rooms) : ControllerBase
+public sealed class BookingsController(
+    BookingService service,
+    IRoomAvailability rooms,
+    IStringLocalizer<ApiMessages> messages) : ControllerBase
 {
     [HttpPost]
     [Consumes("application/json")]
@@ -25,9 +30,15 @@ public sealed class BookingsController(BookingService service, IRoomAvailability
     public async Task<IActionResult> Create(CreateBookingRequest request, CancellationToken cancellationToken)
     {
         if (!TryParseExplicitTimestamp(request.StartsAt, out var startsAt))
-            ModelState.AddModelError("startsAt", "Start must include an explicit UTC offset (for example, Z or +03:00).");
+        {
+            ModelState.AddModelError("startsAt", messages[ApiErrorCodes.TimestampOffsetRequired].Value);
+            LocalizedProblemDetails.AddFieldCode(HttpContext, "startsAt", ApiErrorCodes.TimestampOffsetRequired);
+        }
         if (!TryParseExplicitTimestamp(request.EndsAt, out var endsAt))
-            ModelState.AddModelError("endsAt", "End must include an explicit UTC offset (for example, Z or +03:00).");
+        {
+            ModelState.AddModelError("endsAt", messages[ApiErrorCodes.TimestampOffsetRequired].Value);
+            LocalizedProblemDetails.AddFieldCode(HttpContext, "endsAt", ApiErrorCodes.TimestampOffsetRequired);
+        }
         if (!ModelState.IsValid)
         {
             return BadRequest(CreateValidationProblem(ModelState));
@@ -70,38 +81,24 @@ public sealed class BookingsController(BookingService service, IRoomAvailability
     private IActionResult Validation(IReadOnlyList<FieldError> errors)
     {
         var fieldErrors = errors.GroupBy(x => x.Field)
-            .ToDictionary(x => x.Key, x => x.Select(v => v.Message).ToArray());
-        return BadRequest(CreateValidationProblem(fieldErrors));
+            .ToDictionary(x => x.Key, x => x.Select(v => messages[v.Code].Value).ToArray());
+        var errorCodes = errors.GroupBy(x => x.Field)
+            .ToDictionary(x => x.Key, x => x.Select(v => v.Code).ToArray());
+        return BadRequest(LocalizedProblemDetails.FromErrors(HttpContext, fieldErrors, errorCodes, messages));
     }
 
     private ValidationProblemDetails CreateValidationProblem(
         ModelStateDictionary modelState)
     {
-        var problem = new ValidationProblemDetails(modelState)
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Booking validation failed."
-        };
-        AddCorrelationId(problem);
-        return problem;
+        return LocalizedProblemDetails.FromModelState(HttpContext, modelState, messages);
     }
 
     private ValidationProblemDetails CreateValidationProblem(
         IDictionary<string, string[]> errors)
     {
-        var problem = new ValidationProblemDetails(errors)
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Booking validation failed."
-        };
-        AddCorrelationId(problem);
-        return problem;
+        var errorCodes = errors.ToDictionary(x => x.Key, x => x.Value.Select(_ => ApiErrorCodes.InvalidInput).ToArray());
+        return LocalizedProblemDetails.FromErrors(HttpContext, errors.ToDictionary(x => x.Key, x => x.Value), errorCodes, messages);
     }
-
-    private void AddCorrelationId(ProblemDetails problem) =>
-        problem.Extensions["correlationId"] =
-            HttpContext.Items[CorrelationIdMiddleware.ItemKey]?.ToString()
-            ?? HttpContext.TraceIdentifier;
 
     private async Task<IActionResult> Conflict(BookingConflict conflict)
     {
@@ -113,7 +110,9 @@ public sealed class BookingsController(BookingService service, IRoomAvailability
             conflict.ConflictingStartUtc,
             conflict.ConflictingEndUtc,
             conflict.Alternatives.Select(x => new AlternativeResponse(x.StartsAtUtc, x.EndsAtUtc)).ToArray(),
-            room?.TimeZone.Id ?? "UTC");
+            room?.TimeZone.Id ?? "UTC",
+            conflict.Alternatives.Count == 0 ? ApiErrorCodes.NoAlternatives : ApiErrorCodes.Conflict,
+            messages[conflict.Alternatives.Count == 0 ? ApiErrorCodes.NoAlternatives : ApiErrorCodes.Conflict].Value);
         return StatusCode(StatusCodes.Status409Conflict, response);
     }
 
@@ -149,7 +148,5 @@ public sealed record BookingResponse(Guid Id, Guid RoomId, Guid MemberId, DateTi
     DateTimeOffset StartsAtLocal, DateTimeOffset EndsAtLocal, string TimeZone);
 public sealed record AlternativeResponse(DateTimeOffset StartsAtUtc, DateTimeOffset EndsAtUtc);
 public sealed record ConflictResponse(Guid RoomId, DateTimeOffset RequestedStartUtc, DateTimeOffset RequestedEndUtc,
-    DateTimeOffset ConflictingStartUtc, DateTimeOffset ConflictingEndUtc, IReadOnlyList<AlternativeResponse> Alternatives, string TimeZone)
-{
-    public string Message => Alternatives.Count == 0 ? "No suitable alternatives were found." : "The requested interval is already booked.";
-}
+    DateTimeOffset ConflictingStartUtc, DateTimeOffset ConflictingEndUtc, IReadOnlyList<AlternativeResponse> Alternatives,
+    string TimeZone, string Code, string Message);
