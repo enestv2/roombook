@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Roombook.Api/Roombook.Api.csproj" />
+    <Project Path="src/Roombook.Infrastructure/Roombook.Infrastructure.csproj" />
+    <Project Path="src/Roombook.Reservations/Roombook.Reservations.csproj" />
+    <Project Path="src/Roombook.Rooms/Roombook.Rooms.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Roombook.Api.Tests/Roombook.Api.Tests.csproj" />
+    <Project Path="tests/Roombook.Reservations.Tests/Roombook.Reservations.Tests.csproj" />
+  </Folder>
+</Solution>

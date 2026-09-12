@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Workspace health
-        run: ./scripts/doctor
+        run: sh scripts/doctor
 
   check:
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
       - name: Verification contract
         run: |
           if [ -f scripts/check.conf ]; then
-            ./scripts/check
+            sh scripts/check
           else
             echo "scripts/check.conf not present yet (pre-bootstrap) — skipping."
           fi
