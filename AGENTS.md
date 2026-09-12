@@ -1,13 +1,14 @@
-# AGENTS.md — Project Rules
+# AGENTS.md — Roombook Project Rules
 
-> **STATUS: NOT CONFIGURED.** This workspace has not been adapted to a project yet.
-> The only correct first action is the bootstrap workflow (`workflows/bootstrap.md`).
-> Until bootstrap completes and rewrites this file, do not write application code.
+Roombook is a modular-monolith room and meeting-space reservation application built with React,
+ASP.NET Core 10, and PostgreSQL. V1 optimizes for a conflict-free reservation completed within
+two minutes. Read the relevant project memory before planning: architecture, domain, conventions,
+testing, security, and Git rules live in `docs/`; processes live in `workflows/`.
 
 ## Operating mode
 
-**Mode: unset** — bootstrap sets this to `lite` or `strict` (see `workflows/README.md`).
-Every workflow honors the gates of the current mode.
+**Mode: lite** — human plan approval and independent review remain mandatory (see `workflows/README.md`).
+The stack is greenfield; create a spec before application code.
 
 ## Invariant rules (these survive bootstrap — never delete or weaken them)
 
