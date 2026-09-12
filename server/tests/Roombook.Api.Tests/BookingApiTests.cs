@@ -1,7 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Roombook.Api.Controllers;
+using Roombook.Api.Localization;
 using Roombook.Infrastructure;
 using Roombook.Reservations;
 using Roombook.Rooms;
@@ -10,6 +14,10 @@ namespace Roombook.Api.Tests;
 
 public sealed class BookingApiTests
 {
+    private static readonly IStringLocalizer<ApiMessages> Messages =
+        new StringLocalizer<ApiMessages>(new ResourceManagerStringLocalizerFactory(
+            Options.Create(new LocalizationOptions()), NullLoggerFactory.Instance));
+
     [Fact]
     public async Task ConflictResponseOmitsConflictingMemberIdentity()
     {
@@ -19,7 +27,7 @@ public sealed class BookingApiTests
         var now = new DateTimeOffset(2030, 1, 1, 8, 0, 0, TimeSpan.Zero);
         var service = new BookingService(new InMemoryRoomAvailability(new[] { room }), repository, new FixedTimeProvider(now));
         await service.CreateAsync(Guid.NewGuid(), new BookingCommand(roomId, now.AddDays(1).AddHours(1), now.AddDays(1).AddHours(2)));
-        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }))
+        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }), Messages)
         { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = Principal() } } };
         var result = await controller.Create(new CreateBookingRequest(roomId.Value, now.AddDays(1).AddHours(1), now.AddDays(1).AddHours(2)), default);
         var conflict = Assert.IsType<ObjectResult>(result);
@@ -32,7 +40,7 @@ public sealed class BookingApiTests
     {
         var room = new Room(new RoomId(Guid.NewGuid()), "Room", TimeZoneInfo.Utc, new[] { new WorkingPeriod(new TimeOnly(8, 0), new TimeOnly(18, 0)) });
         var service = new BookingService(new InMemoryRoomAvailability(new[] { room }), new InMemoryBookingRepository(), new FixedTimeProvider(DateTimeOffset.UtcNow));
-        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }))
+        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }), Messages)
         { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = Principal() } } };
         var result = await controller.Create(new CreateBookingRequest(Guid.NewGuid(), DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2)), default);
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -47,7 +55,7 @@ public sealed class BookingApiTests
             new[] { new WorkingPeriod(new TimeOnly(8, 0), new TimeOnly(18, 0)) });
         var service = new BookingService(new InMemoryRoomAvailability(new[] { room }),
             new InMemoryBookingRepository(), new FixedTimeProvider(DateTimeOffset.UtcNow));
-        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }))
+        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }), Messages)
         { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = Principal() } } };
 
         var result = await controller.Create(new CreateBookingRequest(room.Id.Value,
@@ -66,7 +74,7 @@ public sealed class BookingApiTests
             new[] { new WorkingPeriod(new TimeOnly(8, 0), new TimeOnly(18, 0)) });
         var service = new BookingService(new InMemoryRoomAvailability(new[] { room }),
             new InMemoryBookingRepository(), new FixedTimeProvider(DateTimeOffset.UtcNow));
-        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }))
+        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }), Messages)
         { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
         var result = await controller.Create(new CreateBookingRequest(room.Id.Value,
             DateTimeOffset.UtcNow.AddDays(1), DateTimeOffset.UtcNow.AddDays(1).AddHours(1)), default);
@@ -86,7 +94,7 @@ public sealed class BookingApiTests
             new[] { new WorkingPeriod(new TimeOnly(8, 0), new TimeOnly(18, 0)) });
         var service = new BookingService(new InMemoryRoomAvailability(new[] { room }),
             new InMemoryBookingRepository(), new FixedTimeProvider(DateTimeOffset.UtcNow));
-        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }))
+        var controller = new BookingsController(service, new InMemoryRoomAvailability(new[] { room }), Messages)
         {
             ControllerContext = new ControllerContext
             {

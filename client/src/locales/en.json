@@ -1,0 +1,19 @@
+{
+  "language": { "label": "Language", "turkish": "Turkish", "english": "English" },
+  "rooms": { "loading": "Loading rooms…", "empty": "No rooms are currently available.", "loadFailed": "Rooms could not be loaded." },
+  "fields": { "startsAt": "Start", "endsAt": "End", "roomId": "Room", "time": "Time", "authorization": "Authorization", "form": "Form" },
+  "booking": {
+    "title": "Book a room", "start": "Start", "end": "End", "submit": "Book room",
+    "confirmed": "Booking confirmed", "conflictTitle": "That time is unavailable",
+    "noAlternatives": "No alternatives were found.",
+    "submitFailed": "Booking could not be submitted. Check your connection and try again.",
+    "invalidResponse": "The booking response was invalid."
+  },
+  "errors": {
+    "authorizationRequired": "You must be signed in to book a room.",
+    "notAuthorized": "You are not authorized to book a room.",
+    "genericBooking": "Booking could not be created.",
+    "registrationFailed": "Member registration failed.",
+    "signInFailed": "Member sign-in failed."
+  }
+}

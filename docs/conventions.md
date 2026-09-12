@@ -17,6 +17,11 @@ Validate at API and domain boundaries. Return structured field-level validation 
 input and a generic correlation-friendly message for unexpected failures. Never expose stack
 traces, SQL, secrets, or internal identifiers to users; log unexpected failures centrally.
 
+Human-readable client and API messages use the selected `en` or `tr` language. Domain failures
+carry stable codes; the API translates them at the boundary. API error responses keep the existing
+`errors: { field: string[] }` shape and add a stable top-level `code` plus parallel `errorCodes`.
+Message text may change with `Accept-Language`; codes must not.
+
 ## Data rules
 
 Store timestamps in UTC and convert only at presentation boundaries. Use database transactions for
@@ -28,3 +33,6 @@ Do not use floating point for values that require exactness.
 `scripts/check` is the single contract. Once the application exists it runs .NET build/tests with
 warnings as errors and the React lint/typecheck/test/production-build commands; architectural and
 security rules remain reviewable until automated checks are added.
+
+The client uses `i18next`/`react-i18next` with bundled English and Turkish catalogs. English is the
+fallback for missing or unsupported language preferences.

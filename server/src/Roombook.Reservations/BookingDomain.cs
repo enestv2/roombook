@@ -19,7 +19,7 @@ public sealed record Booking(
         !IsCancelled && StartsAtUtc < endUtc && startUtc < EndsAtUtc;
 }
 
-public sealed record FieldError(string Field, string Message);
+public sealed record FieldError(string Field, string Code);
 public sealed record BookingConflict(
     RoomId RoomId,
     DateTimeOffset RequestedStartUtc,
@@ -46,19 +46,19 @@ public sealed class BookingValidator
     public IReadOnlyList<FieldError> Validate(BookingCommand command, Room room, DateTimeOffset nowUtc)
     {
         var errors = new List<FieldError>();
-        if (!room.IsActive) errors.Add(new("roomId", "The room is not available."));
+        if (!room.IsActive) errors.Add(new("roomId", "booking.room_unavailable"));
         var start = command.StartsAt.ToUniversalTime();
         var end = command.EndsAt.ToUniversalTime();
-        if (start <= nowUtc) errors.Add(new("startsAt", "The booking must start in the future."));
-        if (end <= start) errors.Add(new("endsAt", "End must be after start."));
+        if (start <= nowUtc) errors.Add(new("startsAt", "booking.start_in_past"));
+        if (end <= start) errors.Add(new("endsAt", "booking.end_before_start"));
         if (start.TimeOfDay.Ticks % TimeSpan.FromMinutes(15).Ticks != 0)
-            errors.Add(new("startsAt", "Start must be on a 15-minute boundary."));
+            errors.Add(new("startsAt", "booking.start_not_aligned"));
         if (end.TimeOfDay.Ticks % TimeSpan.FromMinutes(15).Ticks != 0)
-            errors.Add(new("endsAt", "End must be on a 15-minute boundary."));
+            errors.Add(new("endsAt", "booking.end_not_aligned"));
         var duration = end - start;
-        if (duration < TimeSpan.FromMinutes(15)) errors.Add(new("endsAt", "Booking duration must be at least 15 minutes."));
-        if (duration > TimeSpan.FromHours(4)) errors.Add(new("endsAt", "Booking duration cannot exceed 4 hours."));
-        if (!RoomSchedule.Contains(room, start, end)) errors.Add(new("time", "The interval must fit within room working hours."));
+        if (duration < TimeSpan.FromMinutes(15)) errors.Add(new("endsAt", "booking.duration_too_short"));
+        if (duration > TimeSpan.FromHours(4)) errors.Add(new("endsAt", "booking.duration_too_long"));
+        if (!RoomSchedule.Contains(room, start, end)) errors.Add(new("time", "booking.outside_working_hours"));
         return errors;
     }
 }
@@ -106,7 +106,7 @@ public sealed class BookingService
         Guid memberId, BookingCommand command, CancellationToken cancellationToken = default)
     {
         var room = await rooms.FindAsync(command.RoomId, cancellationToken);
-        if (room is null) return new BookingValidationFailure(new[] { new FieldError("roomId", "Room was not found.") });
+        if (room is null) return new BookingValidationFailure(new[] { new FieldError("roomId", "booking.room_not_found") });
         var now = clock.GetUtcNow();
         var errors = validator.Validate(command, room, now);
         if (errors.Count != 0) return new BookingValidationFailure(errors);

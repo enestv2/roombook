@@ -10,6 +10,9 @@
 Validate and normalize all client input at API boundaries and enforce domain rules server-side.
 Use framework parameterization/ORM protections for PostgreSQL. Encode output through framework
 defaults. Error responses never contain stack traces, SQL, secrets, or sensitive account details.
+The `Accept-Language` header and saved client language are untrusted inputs; only the supported
+`en` and `tr` cultures are accepted, with English fallback. Translation keys and error codes come
+from server-controlled catalogs rather than user input.
 
 ## AuthN / AuthZ
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0</value></resheader>
+  <data name="validation.failed" xml:space="preserve"><value>Validation failed.</value></data>
+  <data name="validation.invalid" xml:space="preserve"><value>The value is invalid.</value></data>
+  <data name="booking.room_not_found" xml:space="preserve"><value>Room was not found.</value></data>
+  <data name="booking.room_unavailable" xml:space="preserve"><value>The room is not available.</value></data>
+  <data name="booking.start_in_past" xml:space="preserve"><value>The booking must start in the future.</value></data>
+  <data name="booking.end_before_start" xml:space="preserve"><value>End must be after start.</value></data>
+  <data name="booking.start_not_aligned" xml:space="preserve"><value>Start must be on a 15-minute boundary.</value></data>
+  <data name="booking.end_not_aligned" xml:space="preserve"><value>End must be on a 15-minute boundary.</value></data>
+  <data name="booking.duration_too_short" xml:space="preserve"><value>Booking duration must be at least 15 minutes.</value></data>
+  <data name="booking.duration_too_long" xml:space="preserve"><value>Booking duration cannot exceed 4 hours.</value></data>
+  <data name="booking.outside_working_hours" xml:space="preserve"><value>The interval must fit within room working hours.</value></data>
+  <data name="booking.timestamp_offset_required" xml:space="preserve"><value>The timestamp must include an explicit UTC offset (for example, Z or +03:00).</value></data>
+  <data name="booking.conflict" xml:space="preserve"><value>The requested interval is already booked.</value></data>
+  <data name="booking.no_alternatives" xml:space="preserve"><value>No suitable alternatives were found.</value></data>
+  <data name="authorization.required" xml:space="preserve"><value>Authentication is required.</value></data>
+  <data name="authorization.forbidden" xml:space="preserve"><value>You are not authorized to perform this action.</value></data>
+  <data name="resource.not_found" xml:space="preserve"><value>The requested resource was not found.</value></data>
+  <data name="request.unexpected" xml:space="preserve"><value>An unexpected error occurred.</value></data>
+  <data name="request.unexpected_detail" xml:space="preserve"><value>The request could not be completed. Use the correlation ID when contacting support.</value></data>
+  <data name="identity.duplicate_email" xml:space="preserve"><value>Email is already registered.</value></data>
+  <data name="identity.duplicate_username" xml:space="preserve"><value>Username is already taken.</value></data>
+  <data name="identity.invalid_email" xml:space="preserve"><value>Email is not valid.</value></data>
+  <data name="identity.password_too_short" xml:space="preserve"><value>Password is too short.</value></data>
+  <data name="identity.password_requires_digit" xml:space="preserve"><value>Password must contain a digit.</value></data>
+  <data name="identity.password_requires_lower" xml:space="preserve"><value>Password must contain a lowercase letter.</value></data>
+  <data name="identity.password_requires_upper" xml:space="preserve"><value>Password must contain an uppercase letter.</value></data>
+  <data name="identity.password_requires_symbol" xml:space="preserve"><value>Password must contain a non-alphanumeric character.</value></data>
+  <data name="identity.invalid_token" xml:space="preserve"><value>The token is invalid.</value></data>
+</root>

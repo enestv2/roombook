@@ -1,22 +1,45 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Npgsql;
 using Roombook.Api;
+using Roombook.Api.Localization;
 using Roombook.Infrastructure;
 using Roombook.Reservations;
 using Roombook.Rooms;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
+builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var cultures = new[] { new CultureInfo("en"), new CultureInfo("tr") };
+    options.DefaultRequestCulture = new RequestCulture("en");
+    options.SupportedCultures = cultures;
+    options.SupportedUICultures = cultures;
+});
 builder.Services.AddRoombookSwagger();
 builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>
     {
+        var messages = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<ApiMessages>>();
+        var code = ApiErrorCodes.ForStatus(context.ProblemDetails.Status ?? StatusCodes.Status500InternalServerError);
+        context.ProblemDetails.Title = messages[code].Value;
         var correlationId = context.HttpContext.Items[CorrelationIdMiddleware.ItemKey]?.ToString()
             ?? context.HttpContext.TraceIdentifier;
+        context.ProblemDetails.Extensions["code"] = code;
+        if (context.ProblemDetails is ValidationProblemDetails validation
+            && !context.ProblemDetails.Extensions.ContainsKey("errorCodes"))
+        {
+            context.ProblemDetails.Extensions["errorCodes"] = validation.Errors.ToDictionary(
+                entry => entry.Key,
+                entry => entry.Value.Select(_ => entry.Key).ToArray());
+        }
         context.ProblemDetails.Extensions["correlationId"] = correlationId;
     };
 });
@@ -24,15 +47,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
-        var correlationId = context.HttpContext.Items[CorrelationIdMiddleware.ItemKey]?.ToString()
-            ?? context.HttpContext.TraceIdentifier;
-        var problem = new ValidationProblemDetails(context.ModelState)
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation failed."
-        };
-        problem.Extensions["correlationId"] = correlationId;
-        return new BadRequestObjectResult(problem);
+        var messages = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<ApiMessages>>();
+        return new BadRequestObjectResult(LocalizedProblemDetails.FromModelState(
+            context.HttpContext, context.ModelState, messages));
     };
 });
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
@@ -65,6 +82,7 @@ if (identityEnabled)
     })
     .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+    builder.Services.AddScoped<IdentityErrorDescriber, LocalizedIdentityErrorDescriber>();
     builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, MemberClaimsPrincipalFactory>();
 }
 else
@@ -96,6 +114,7 @@ else
 builder.Services.AddSingleton<BookingService>();
 
 var app = builder.Build();
+app.UseRequestLocalization();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -118,19 +137,17 @@ app.UseStatusCodePages(async statusContext =>
         return;
 
     var problemDetails = statusContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+    var messages = statusContext.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<ApiMessages>>();
+    var statusCode = response.StatusCode;
+    var code = ApiErrorCodes.ForStatus(statusCode);
     await problemDetails.WriteAsync(new ProblemDetailsContext
     {
         HttpContext = statusContext.HttpContext,
         ProblemDetails = new Microsoft.AspNetCore.Mvc.ProblemDetails
         {
-            Status = response.StatusCode,
-            Title = response.StatusCode switch
-            {
-                StatusCodes.Status401Unauthorized => "Authentication is required.",
-                StatusCodes.Status403Forbidden => "You are not authorized to perform this action.",
-                StatusCodes.Status404NotFound => "The requested resource was not found.",
-                _ => "The request could not be completed."
-            }
+            Status = statusCode,
+            Title = messages[code].Value,
+            Detail = messages[code].Value
         }
     });
 });

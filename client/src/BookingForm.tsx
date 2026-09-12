@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createBooking, type BookingConfirmation, type BookingForm, type Conflict } from './api';
+import { currentLanguage } from './i18n';
 
 export function BookingFormView({ roomId, timeZone }: { roomId: string; timeZone: string }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<BookingForm>({ roomId, startsAt: '', endsAt: '' });
   const [startsAtLocal, setStartsAtLocal] = useState('');
   const [endsAtLocal, setEndsAtLocal] = useState('');
@@ -19,7 +22,7 @@ export function BookingFormView({ roomId, timeZone }: { roomId: string; timeZone
       setConflict(result.conflict);
       setErrors(result.errors ?? {});
     } catch {
-      setErrors({ form: ['Booking could not be submitted. Check your connection and try again.'] });
+      setErrors({ form: [t('booking.submitFailed')] });
     }
   };
   useEffect(() => setForm(current => ({ ...current, roomId })), [roomId]);
@@ -28,14 +31,14 @@ export function BookingFormView({ roomId, timeZone }: { roomId: string; timeZone
     setStartsAtLocal(utcToLocalInput(start, timeZone));
     setEndsAtLocal(utcToLocalInput(end, timeZone));
   };
-  if (confirmation) return <section aria-live="polite"><h2>Booking confirmed</h2><p>{confirmation.startsAtLocal} – {confirmation.endsAtLocal} ({confirmation.timeZone})</p></section>;
-  return <main><h1>Book a room</h1><form onSubmit={submit}>
-    <label>Start <input type="datetime-local" value={startsAtLocal} onChange={e => { setStartsAtLocal(e.target.value); setForm({ ...form, startsAt: localInputToUtcIso(e.target.value, timeZone) }); }} /></label>
-    <label>End <input type="datetime-local" value={endsAtLocal} onChange={e => { setEndsAtLocal(e.target.value); setForm({ ...form, endsAt: localInputToUtcIso(e.target.value, timeZone) }); }} /></label>
-    <button type="submit">Book room</button>
+  if (confirmation) return <section aria-live="polite"><h2>{t('booking.confirmed')}</h2><p>{confirmation.startsAtLocal} – {confirmation.endsAtLocal} ({confirmation.timeZone})</p></section>;
+  return <main><h1>{t('booking.title')}</h1><form onSubmit={submit}>
+    <label>{t('booking.start')} <input type="datetime-local" value={startsAtLocal} onChange={e => { setStartsAtLocal(e.target.value); setForm({ ...form, startsAt: localInputToUtcIso(e.target.value, timeZone) }); }} /></label>
+    <label>{t('booking.end')} <input type="datetime-local" value={endsAtLocal} onChange={e => { setEndsAtLocal(e.target.value); setForm({ ...form, endsAt: localInputToUtcIso(e.target.value, timeZone) }); }} /></label>
+    <button type="submit">{t('booking.submit')}</button>
   </form>
-  {Object.entries(errors).map(([field, messages]) => <p role="alert" key={field}>{field}: {messages.join(' ')}</p>)}
-  {conflict && <section aria-live="polite"><h2>That time is unavailable</h2><p>{formatRoomTime(conflict.conflictingStartUtc, timeZone)} – {formatRoomTime(conflict.conflictingEndUtc, timeZone)}</p>{conflict.alternatives.length === 0 ? <p>No alternatives were found.</p> : <ul>{conflict.alternatives.map(slot => <li key={slot.startsAtUtc}><button type="button" onClick={() => selectAlternative(slot.startsAtUtc, slot.endsAtUtc)}>{formatRoomTime(slot.startsAtUtc, timeZone)} – {formatRoomTime(slot.endsAtUtc, timeZone)}</button></li>)}</ul>}</section>}
+  {Object.entries(errors).map(([field, messages]) => <p role="alert" key={field}>{t(`fields.${field}`, { defaultValue: field })}: {messages.join(' ')}</p>)}
+  {conflict && <section aria-live="polite"><h2>{t('booking.conflictTitle')}</h2><p>{conflict.message || `${formatRoomTime(conflict.conflictingStartUtc, timeZone)} – ${formatRoomTime(conflict.conflictingEndUtc, timeZone)}`}</p>{conflict.alternatives.length === 0 ? <p>{t('booking.noAlternatives')}</p> : <ul>{conflict.alternatives.map(slot => <li key={slot.startsAtUtc}><button type="button" onClick={() => selectAlternative(slot.startsAtUtc, slot.endsAtUtc)}>{formatRoomTime(slot.startsAtUtc, timeZone)} – {formatRoomTime(slot.endsAtUtc, timeZone)}</button></li>)}</ul>}</section>}
   </main>;
 }
 
@@ -69,5 +72,5 @@ function timeZoneOffsetMinutes(instant: Date, timeZone: string): number {
 }
 
 function formatRoomTime(value: string, timeZone: string): string {
-  return new Date(value).toLocaleString(undefined, { timeZone });
+  return new Date(value).toLocaleString(currentLanguage(), { timeZone });
 }

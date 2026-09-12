@@ -80,8 +80,12 @@ public sealed class SwaggerTests
             "endsAtUtc", "startsAtLocal", "endsAtLocal", "timeZone");
         AssertRequired(schemas, "AlternativeResponse", "startsAtUtc", "endsAtUtc");
         AssertRequired(schemas, "ConflictResponse", "roomId", "requestedStartUtc", "requestedEndUtc",
-            "conflictingStartUtc", "conflictingEndUtc", "alternatives", "timeZone", "message");
-        AssertRequired(schemas, "ValidationProblemDetails", "errors");
+            "conflictingStartUtc", "conflictingEndUtc", "alternatives", "timeZone", "code", "message");
+        AssertRequired(schemas, "ValidationProblemDetails", "errors", "code", "errorCodes");
+        Assert.Contains("code", schemas.GetProperty("ProblemDetails").GetProperty("properties")
+            .EnumerateObject().Select(property => property.Name));
+        Assert.Contains("errorCodes", schemas.GetProperty("ValidationProblemDetails").GetProperty("properties")
+            .EnumerateObject().Select(property => property.Name));
         Assert.Contains("correlationId", schemas.GetProperty("ProblemDetails").GetProperty("properties")
             .EnumerateObject().Select(property => property.Name));
         Assert.Contains("correlationId", schemas.GetProperty("ValidationProblemDetails").GetProperty("properties")
