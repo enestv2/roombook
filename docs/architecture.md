@@ -1,25 +1,35 @@
 # Architecture
 
-> **Template — filled during bootstrap.** Describe the architecture you *decided on*, not an
-> aspiration. Agents read this file before planning; vague answers here become vague code.
-
 ## System overview
-<!-- 3–6 sentences: what the system is, its architectural style (monolith / modular monolith /
-services / etc.), and the one-line reason for that choice (link the ADR). -->
+
+Roombook is a web application for finding available rooms and creating conflict-free reservations.
+V1 uses a modular monolith: one deployable ASP.NET Core 10 application with explicit domain
+boundaries and a React client. PostgreSQL is the system of record. This keeps deployment and
+operations simple for a small team while preserving boundaries for later extraction.
 
 ## Modules / components and ownership
-<!-- One row per module: single responsibility + the data it owns (conceptual, not table-level). -->
 
 | Module | Single responsibility | Owns |
 |---|---|---|
-| | | |
+| Identity & access | Authentication and role checks | Users, roles, credentials |
+| Rooms | Room catalog and room configuration | Rooms, capacity, features |
+| Availability | Working hours and availability queries | Working schedules, availability rules |
+| Reservations | Reservation lifecycle and conflict prevention | Reservations and cancellation state |
+| Administration | Management workflows for authorized users | Administrative commands and audit context |
 
 ## Communication rules
-<!-- When is a direct call allowed, when an event/message, when is it forbidden? -->
+
+Modules may call another module only through its public application interface. Reservation
+creation must use the availability interface and enforce the conflict check transactionally.
+Internal types and storage of another module are not shared. Events are not required in V1.
 
 ## Forbidden dependencies (make them testable)
-<!-- Concrete prohibitions an architecture test could assert, e.g.
-"Module A never accesses Module B's internal types or storage — only its public interface." -->
+
+- No module accesses another module's internal types, repositories, or database mappings.
+- No module-specific code depends on an external reservation, identity, or paid SaaS service.
+- The React client does not connect directly to PostgreSQL.
 
 ## Deliberately out of scope
-<!-- Conscious non-goals for the current version. -->
+
+Payments, external calendar/identity integrations, notifications, recurring reservations, advanced
+reporting, and microservice deployment are not V1 requirements.

@@ -1,20 +1,30 @@
 # Conventions
 
-> **Template — filled during bootstrap.** Only rules that are real: every rule here should be
-> either enforced by tooling (preferred) or checked in review. Aspirations don't belong here.
-
 ## Language & framework versions
-<!-- Pin what matters. -->
+
+- Backend: ASP.NET Core 10 / .NET 10.
+- Frontend: React with TypeScript.
+- Database: PostgreSQL.
 
 ## Naming
-<!-- Files, types, tests, branches — whatever the team must keep consistent. -->
+
+Use the established conventions of C#, ASP.NET Core, TypeScript, and React. Name domain concepts
+consistently with `docs/domain.md`; test names describe observable behavior and the rule they cover.
 
 ## Error handling
-<!-- The one blessed pattern. What never leaks to users. -->
+
+Validate at API and domain boundaries. Return structured field-level validation errors for invalid
+input and a generic correlation-friendly message for unexpected failures. Never expose stack
+traces, SQL, secrets, or internal identifiers to users; log unexpected failures centrally.
 
 ## Data rules
-<!-- e.g. money/percentages use decimal types; timestamps are UTC; IDs are ... -->
+
+Store timestamps in UTC and convert only at presentation boundaries. Use database transactions for
+reservation conflict checks. Treat client-supplied role, owner, and availability data as untrusted.
+Do not use floating point for values that require exactness.
 
 ## Enforced by tooling
-<!-- List what the compiler/linter/analyzers already enforce, so review doesn't re-litigate it.
-Wire new rules into `scripts/check` whenever possible — prose is advice, tooling is law. -->
+
+`scripts/check` is the single contract. Once the application exists it runs .NET build/tests with
+warnings as errors and the React lint/typecheck/test commands; architectural and security rules
+remain reviewable until automated checks are added.
